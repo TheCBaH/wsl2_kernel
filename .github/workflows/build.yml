@@ -18,6 +18,11 @@ jobs:
     - name: kbuild.image
       run: |
         make kbuild.image
+    - name: git
+      run: |
+        set -x
+        ./git-prepare.sh
+        df -h
     - name: kbuild.kernel
       run: |
         set -x
