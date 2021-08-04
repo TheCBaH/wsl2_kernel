@@ -1,0 +1,15 @@
+ARG OS_VER=stable-slim
+FROM debian:${OS_VER}
+RUN set -eux;\
+    apt-get update;\
+    env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends\
+ bc\
+ ccache\
+ bison\
+ build-essential\
+ flex\
+ libelf-dev\
+ libssl-dev\
+ ;\
+    apt-get clean; rm -rf /var/lib/apt/lists/*;\
+    echo DONE

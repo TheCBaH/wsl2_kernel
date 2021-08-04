@@ -1,0 +1,134 @@
+name: wsl2_kernel
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: 0 1 * * MON
+  workflow_dispatch:
+
+jobs:
+  git:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: false
+    - name: ID
+      id: repo-key
+      run: |
+        echo "::set-output name=date::$(/bin/date -u "+%Y%m")"
+    - name: git-cache
+      uses: actions/cache@v2
+      id: wsl2_repo
+      with:
+        path: wsl2-repo.git
+        key: wsl2-repo.git-${{ secrets.CACHE_ID }}-${{ steps.repo-key.outputs.date }}
+        restore-keys: |
+          wsl2-repo.git-${{ secrets.CACHE_ID }}-${{ steps.repo-key.outputs.date }}
+          wsl2-repo.git-${{ secrets.CACHE_ID }}
+    - name: git-init
+      if: steps.wsl2_repo.outputs.cache-hit != 'true'
+      run: make repo_init
+
+  kernel:
+    runs-on: ubuntu-latest
+    needs: git
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: [linux-msft-wsl-4.19.y, linux-msft-wsl-5.4.y, linux-msft-wsl-5.10.y]
+        tag: [none]
+        exclude:
+          - tag: none
+        include:
+          - branch: linux-msft-wsl-4.19.y
+            tag: 4.19.104-microsoft-standard
+          - branch: linux-msft-wsl-4.19.y
+            tag: 4.19.121-microsoft-standard
+          - branch: linux-msft-wsl-4.19.y
+            tag: 4.19.128-microsoft-standard
+          - branch: linux-msft-wsl-4.19.y
+            tag: 4.19.81-microsoft-standard
+          - branch: linux-msft-wsl-4.19.y
+            tag: 4.19.84-microsoft-standard
+          - branch: linux-msft-wsl-5.4.y
+            tag: linux-msft-5.4.51
+          - branch: linux-msft-wsl-5.4.y
+            tag: linux-msft-5.4.72
+          - branch: linux-msft-wsl-5.4.y
+            tag: linux-msft-5.4.81
+          - branch: linux-msft-wsl-5.4.y
+            tag: linux-msft-5.4.83
+          - branch: linux-msft-wsl-5.4.y
+            tag: linux-msft-5.4.91
+          - branch: linux-msft-wsl-5.10.y
+            tag: linux-msft-wsl-5.10.16.3
+          - branch: linux-msft-wsl-5.10.y
+            tag: linux-msft-wsl-5.10.43.3
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: false
+    - name: kbuild.image
+      run: |
+        set -x
+        image=$(make kbuild.image_print)
+        IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$GITHUB_REPOSITORY/$image
+        IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+        old_id=''
+        if docker pull $IMAGE_ID; then
+          old_id=$(docker image inspect $IMAGE_ID --format "{{.ID}}")
+        fi
+        make kbuild.image DOCKER_BUILD_OPTS="--cache-from=$IMAGE_ID"
+        new_id=$(docker image inspect $image --format "{{.ID}}")
+        if [ "$old_id" != "$new_id" ]; then
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker tag $image $IMAGE_ID:latest
+          docker push $IMAGE_ID:latest || true
+          rm -rf ~/.docker
+        fi
+    - name: ccache
+      uses: actions/cache@v2
+      id: wsl2_ccache
+      with:
+        path: .ccache
+        key: wsl2-ccache-${{ secrets.CACHE_ID }}-${{ matrix.branch }}-${{ matrix.tag}}-${{ hashFiles('Dockerfile*','Makefile','custom_config.sh') }}
+        restore-keys: |
+          wsl2-ccache-${{ secrets.CACHE_ID }}-${{ matrix.branch }}-${{ matrix.tag}}-${{ hashFiles('Dockerfile*','Makefile','custom_config.sh') }}
+          wsl2-ccache-${{ secrets.CACHE_ID }}-${{ matrix.branch }}-${{ matrix.tag}}
+          wsl2-ccache-${{ secrets.CACHE_ID }}-${{ matrix.branch }}
+    - name: ccache.init
+      if: steps.wsl2_ccache.outputs.cache-hit != 'true'
+      run: make kbuild.ccache-init
+    - name: repo
+      uses: actions/cache@v2
+      id: wsl2_repo
+      with:
+        path: wsl2-repo.git
+        key: wsl2-repo.git-${{ hashFiles('repo.sh') }}
+        restore-keys: |
+          wsl2-repo.git-${{ hashFiles('repo.sh') }}
+          wsl2-repo.git
+    - name: wsl-init
+      if: steps.wsl2_repo.outputs.cache-hit != 'true'
+      run: make repo_init
+    - name: wsl-update
+      run: make ${{ matrix.tag }}.repo_update
+    - name: kbuild.config
+      run: make configure
+    - name: kbuild.ccache
+      run: |
+        set -x
+        make kbuild.ccache-zero-stats
+        make kbuild.ccache _CPU_CORES=3 </dev/null
+        make kbuild.ccache-show-stats
+    - name: kernel
+      run: mv $(make print-kernel)  ${{ matrix.tag }}-${{ github.workflow }}
+    - name: wsl2-kernel
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.tag }}
+        path: ${{ matrix.tag }}-${{ github.workflow }}
