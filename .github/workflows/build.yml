@@ -1,0 +1,25 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: 0 1 * * MON
+  workflow_dispatch:
+
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: kbuild.image
+      run: |
+        make kbuild.image
+    - name: kbuild.kernel
+      run: |
+        set -x
+        CPU_CORES=$(getconf _NPROCESSORS_ONLN 2>/dev/null)
+        make kbuild.image_run CMD='make -C WSL2-Linux-Kernel  KCONFIG_CONFIG=Microsoft/config-wsl -j$CPU_CORES'
