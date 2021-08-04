@@ -38,3 +38,7 @@ kbuild.ccache-init:
 kbuild.ccache:
 	CPU_CORES=$$(getconf _NPROCESSORS_ONLN 2>/dev/null)
 	${MAKE} ${basename $@}.image_run CMD="env CCACHE_DIR=${WORKSPACE}/.ccache make -C WSL2-Linux-Kernel CC='ccache gcc' KCONFIG_CONFIG=Microsoft/config-wsl -j$$CPU_CORES"
+
+kbuild.build:
+	CPU_CORES=$$(getconf _NPROCESSORS_ONLN 2>/dev/null)
+	${MAKE} ${basename $@}.image_run CMD="env make -C WSL2-Linux-Kernel KCONFIG_CONFIG=Microsoft/config-wsl -j$$CPU_CORES"

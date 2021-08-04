@@ -25,6 +25,9 @@ jobs:
         df -h
     - name: kbuild.kernel
       run: |
+        make kbuild.build
+    - name: kbuild.ccache
+      run: |
         set -x
         make kbuild.ccache-init
         make kbuild.ccache
