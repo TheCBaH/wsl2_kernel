@@ -21,5 +21,6 @@ jobs:
     - name: kbuild.kernel
       run: |
         set -x
-        CPU_CORES=$(getconf _NPROCESSORS_ONLN 2>/dev/null)
-        make kbuild.image_run CMD="make -C WSL2-Linux-Kernel  KCONFIG_CONFIG=Microsoft/config-wsl -j$CPU_CORES"
+        make kbuild.ccache-init
+        make kbuild.ccache
+        du -sh .ccache
