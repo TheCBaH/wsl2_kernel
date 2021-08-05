@@ -35,6 +35,18 @@ jobs:
   kernel:
     runs-on: ubuntu-latest
     needs: git
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: [linux-msft-wsl-4.19.y, linux-msft-wsl-5.4.y, linux-msft-wsl-5.10.y]
+        tag: []
+        include:
+          - branch: linux-msft-wsl-4.19.y
+            tag: [4.19.104-microsoft-standard, 4.19.121-microsoft-standard]
+          - branch: linux-msft-wsl-5.4.y
+            tag: [linux-msft-5.4.6, linux-msft-5.4.51]
+          - branch: linux-msft-wsl-5.10.y
+            tag: [linux-msft-wsl-5.10.16.3, linux-msft-wsl-5.10.43.3]
     steps:
     - name: checkout
       uses: actions/checkout@v2
@@ -63,10 +75,10 @@ jobs:
       id: wsl2_ccache
       with:
         path: .ccache
-        key: wsl2-ccache-${{ hashFiles('Makefile','custom_config.sh') }}
+        key: wsl2-ccache-${{ matrix.branch }}-${{ hashFiles('Makefile','custom_config.sh') }}
         restore-keys: |
           wsl2-ccache-${{ hashFiles('Makefile','custom_config.sh') }}
-          wsl2-ccache
+          wsl2-ccache-${{ matrix.branch }}
     - name: ccache.init
       if: steps.wsl2_ccache.outputs.cache-hit != 'true'
       run: make kbuild.ccache-init
@@ -83,7 +95,7 @@ jobs:
       if: steps.wsl2_repo.outputs.cache-hit != 'true'
       run: make repo_init
     - name: wsl-update
-      run: make linux-msft-4.19.128.repo_update
+      run: make ${{ matrix.tag }}
     - name: kbuild.config
       run: make configure
     - name: kbuild.ccache
