@@ -34,8 +34,9 @@ jobs:
       run: |
         set -x
         cp -rl wsl2-repo wsl2-repo.git
-        git -c protocol.version=2 -C wsl2-repo.git remote fetch --depth 1 origin linux-msft-4.19.128:linux-msft-4.19.128
+        git -c protocol.version=2 -C wsl2-repo.git fetch --depth 1 origin linux-msft-4.19.128:linux-msft-4.19.128
         git -C checkout linux-msft-4.19.128
+
   kernel:
     runs-on: ubuntu-latest
     steps:
