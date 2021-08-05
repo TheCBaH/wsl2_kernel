@@ -19,7 +19,8 @@ jobs:
       id: repo-key
       run: |
         echo "::set-output name=date::$(/bin/date -u "+%Y%m")"
-    - uses: actions/cache@v2
+    - name: git-cache
+      uses: actions/cache@v2
       id: wsl2_repo
       with:
         path: wsl2-repo.git
@@ -27,9 +28,9 @@ jobs:
         restore-keys: |
           wsl2-repo.git-${{ steps.repo-key.outputs.date }}
           wsl2-repo.git
-    - name: git
+    - name: git-init
       if: steps.wsl2_repo.outputs.cache-hit != 'true'
-      run: make repo.init
+      run: make repo_init
 
   kernel:
     runs-on: ubuntu-latest
@@ -57,7 +58,8 @@ jobs:
           docker push $IMAGE_ID:latest || true
           rm -rf ~/.docker
         fi
-    - uses: actions/cache@v2
+    - name: ccache
+      uses: actions/cache@v2
       id: wsl2_ccache
       with:
         path: .ccache
@@ -65,10 +67,11 @@ jobs:
         restore-keys: |
           wsl2-ccache-${{ hashFiles('Makefile','custom_config.sh') }}
           wsl2-ccache
-    - name: git
+    - name: ccache.init
       if: steps.wsl2_ccache.outputs.cache-hit != 'true'
       run: make kbuild.ccache-init
-    - uses: actions/cache@v2
+    - name: repo
+      uses: actions/cache@v2
       id: wsl2_repo
       with:
         path: wsl2-repo.git
@@ -76,9 +79,9 @@ jobs:
         restore-keys: |
           wsl2-repo.git-${{ hashFiles('repo.sh') }}
           wsl2-repo.git
-    - name: git
+    - name: wsl-init
       if: steps.wsl2_repo.outputs.cache-hit != 'true'
-      run: make repo.init
+      run: make repo_init
     - name: wsl-update
       run: make linux-msft-4.19.128.repo_update
     - name: kbuild.config
