@@ -23,12 +23,11 @@ update)
     _git="git -C $repo"
     if [ -d $repo ]; then
         $_git checkout .
-        $_git checkout $($_git rev-parse HEAD)
         $_git clean -xdf
     else
         cp -rl $repo.git $repo
     fi
-    $_git -c protocol.version=2 fetch --no-tags --depth 1 origin +$ref:$ref
-    $_git checkout $ref
+    $_git -c protocol.version=2 fetch --no-tags --depth 1 origin +$ref:remote/$ref
+    $_git reset --merge remote/$ref
     ;;
 esac
