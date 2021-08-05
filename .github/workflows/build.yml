@@ -22,11 +22,11 @@ jobs:
     - uses: actions/cache@v2
       id: wsl2_repo
       with:
-        path: wsl2-repo
-        key: wsl2-repo-${{ steps.repo-key.outputs.date }}
+        path: wsl2-repo.git
+        key: wsl2-repo.git-${{ steps.repo-key.outputs.date }}
         restore-keys: |
-          wsl2-repo-${{ steps.repo-key.outputs.date }}
-          wsl2-repo
+          wsl2-repo.git-${{ steps.repo-key.outputs.date }}
+          wsl2-repo.git
     - name: git
       if: steps.wsl2_repo.outputs.cache-hit != 'true'
       run: |
