@@ -2,7 +2,7 @@
 set -x
 set -eu
 
-repo=wsl2-repo
+repo=wsl2-repo.git
 rm -rf $repo;mkdir -p $repo
 _git="git -C $repo"
 $_git init .
