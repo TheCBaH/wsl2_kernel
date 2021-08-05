@@ -103,7 +103,7 @@ jobs:
       if: steps.wsl2_repo.outputs.cache-hit != 'true'
       run: make repo_init
     - name: wsl-update
-      run: make ${{ matrix.tag }}
+      run: make ${{ matrix.tag }}.repo_update
     - name: kbuild.config
       run: make configure
     - name: kbuild.ccache
