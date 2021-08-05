@@ -25,6 +25,12 @@ image_name=${USER}_$(basename $(1))
 %.print:
 	@echo $($(basename $@))
 
+repo_init:
+	./repo.sh init
+
+%.repo_update:
+	./repo.sh update $(basename $@)
+
 %.image_run:
 	docker run --rm --init --hostname $@ -i${TERMINAL} -w ${WORKSPACE} -v ${WORKSPACE}:${WORKSPACE}\
 	 ${DOCKER_RUN_OPTS}\

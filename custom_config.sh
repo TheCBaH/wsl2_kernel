@@ -13,7 +13,7 @@ enable () {
 sed -Ei\
  -e "$(disable BTRFS_FS)"\
  -e "$(disable CC_OPTIMIZE_FOR_PERFORMANCE)"\
- -e "$(disable CEPH)"\
+ -e "$(disable CEPH_FS)"\
  -e "$(disable CIFS)"\
  -e "$(disable CPU_SUP_CENTAUR)"\
  -e "$(disable HOTPLUG_CPU)"\
@@ -27,6 +27,7 @@ sed -Ei\
  -e "$(disable SLHC)"\
  -e "$(disable WIREGUARD)"\
  -e "$(disable XFS_FS)"\
+ -e "$(enable BLK_DEV_NBD)"\
  -e "$(enable CC_OPTIMIZE_FOR_SIZE)"\
  $config
 

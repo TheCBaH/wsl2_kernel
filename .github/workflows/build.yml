@@ -29,25 +29,16 @@ jobs:
           wsl2-repo.git
     - name: git
       if: steps.wsl2_repo.outputs.cache-hit != 'true'
-      run: |
-        set -x
-        ./git-prepare.sh
-        du -sh wsl2-repo.git
-        df -h
-    - name: checkout
-      run: |
-        set -x
-        cp -rl wsl2-repo.git wsl2-repo
-        git -c protocol.version=2 -C wsl2-repo fetch --no-tags --depth 1 origin linux-msft-4.19.128:linux-msft-4.19.128
-        git -C wsl2-repo checkout linux-msft-4.19.128
+      run: make repo.init
 
   kernel:
     runs-on: ubuntu-latest
+    needs: git
     steps:
     - name: checkout
       uses: actions/checkout@v2
       with:
-        submodules: true
+        submodules: false
     - name: kbuild.image
       run: |
         set -x
@@ -66,21 +57,30 @@ jobs:
           docker push $IMAGE_ID:latest || true
           rm -rf ~/.docker
         fi
-    - name: ID
-      id: repo-key
-      run: echo "::set-output name=date::$(/bin/date -u "+%Y%m")"
     - uses: actions/cache@v2
       id: wsl2_ccache
       with:
         path: .ccache
-        key: wsl2-ccache-${{ steps.repo-key.outputs.date }}-${{ hashFiles('Makefile','custom_config.sh') }}
+        key: wsl2-ccache-${{ hashFiles('Makefile','custom_config.sh') }}
         restore-keys: |
-          wsl2-ccache-${{ steps.repo-key.outputs.date }}-${{ hashFiles('Makefile','custom_config.sh') }}
-          wsl2-ccache-${{ steps.repo-key.outputs.date }}
+          wsl2-ccache-${{ hashFiles('Makefile','custom_config.sh') }}
           wsl2-ccache
     - name: git
       if: steps.wsl2_ccache.outputs.cache-hit != 'true'
       run: make kbuild.ccache-init
+    - uses: actions/cache@v2
+      id: wsl2_repo
+      with:
+        path: wsl2-repo.git
+        key: wsl2-repo.git-${{ hashFiles('repo.sh') }}
+        restore-keys: |
+          wsl2-repo.git-${{ hashFiles('repo.sh') }}
+          wsl2-repo.git
+    - name: git
+      if: steps.wsl2_repo.outputs.cache-hit != 'true'
+      run: make repo.init
+    - name: wsl-update
+      run: make linux-msft-4.19.128.repo_update
     - name: kbuild.config
       run: ./custom_config.sh </dev/null
     - name: kbuild.ccache
