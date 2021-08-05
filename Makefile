@@ -51,8 +51,19 @@ configure:
 	./configure.sh ${REPO}/${CONFIG}
 
 CPU_CORES=$(shell getconf _NPROCESSORS_ONLN 2>/dev/null)
+
+kbuild.ccache-zero-stats:
+	${MAKE} ${basename $@}.image_run CMD='env CCACHE_DIR=${WORKSPACE}/.ccache ccache ${CCACHE_CONFIG} --zero-stats'
+
+kbuild.ccache-show-stats:
+	${MAKE} ${basename $@}.image_run CMD='env CCACHE_DIR=${WORKSPACE}/.ccache ccache ${CCACHE_CONFIG} --show-stats'
+
 kbuild.ccache:
 	${MAKE} ${basename $@}.image_run CMD="env CCACHE_DIR=${WORKSPACE}/.ccache make -C ${REPO} CC='ccache gcc' KCONFIG_CONFIG=Microsoft/config-wsl $(if ${CPU_CORES},-j${CPU_CORES})"
 
 kbuild.build:
 	${MAKE} ${basename $@}.image_run CMD="env make -C ${REPO} KCONFIG_CONFIG=${CONFIG} $(if ${CPU_CORES},-j${CPU_CORES})"
+
+print-kernel:
+	@echo ${REPO}/arch/x86/boot/bzImage
+

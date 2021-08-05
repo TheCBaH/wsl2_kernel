@@ -47,10 +47,20 @@ jobs:
             tag: 4.19.104-microsoft-standard
           - branch: linux-msft-wsl-4.19.y
             tag: 4.19.121-microsoft-standard
+          - branch: linux-msft-wsl-4.19.y
+            tag: 4.19.128-microsoft-standard
+          - branch: linux-msft-wsl-4.19.y
+            tag: 4.19.84-microsoft-standard
           - branch: linux-msft-wsl-5.4.y
             tag: linux-msft-5.4.51
           - branch: linux-msft-wsl-5.4.y
             tag: linux-msft-5.4.72
+          - branch: linux-msft-wsl-5.4.y
+            tag: linux-msft-5.4.81
+          - branch: linux-msft-wsl-5.4.y
+            tag: linux-msft-5.4.83
+          - branch: linux-msft-wsl-5.4.y
+            tag: linux-msft-5.4.91
           - branch: linux-msft-wsl-5.10.y
             tag: linux-msft-wsl-5.10.16.3
           - branch: linux-msft-wsl-5.10.y
@@ -108,4 +118,16 @@ jobs:
     - name: kbuild.config
       run: make configure
     - name: kbuild.ccache
-      run: make kbuild.ccache </dev/null
+      run: |
+        set -x
+        make kbuild.ccache-zero-stats
+        make kbuild.ccache </dev/null
+        make kbuild.ccache-show-stats
+    - name: kernel
+      id: kernel
+      run: echo "::set-output name=kernel::$(make print-kernel)"
+    - name: wsl2-kernel
+      uses: actions/upload-artifact@v2
+      with:
+        name: bzImage-${{ matrix.tag }}
+        path: ${{ steps.kernel.outputs.kernel }}
