@@ -30,6 +30,9 @@ image_name=${USER}_$(basename $(1))
 	 ${DOCKER_RUN_OPTS}\
 	 ${USERSPEC} $(call image_name, $@) ${CMD}
 
+%.image_print:
+	@echo "$(call image_name, $@)"
+
 CCACHE_CONFIG=--max-size=2G --set-config=compression=true
 
 kbuild.ccache-init:
