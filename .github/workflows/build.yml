@@ -73,13 +73,13 @@ jobs:
       id: wsl2_ccache
       with:
         path: .ccache
-        key: wsl2-ccache-${{ steps.repo-key.outputs.date }}-${{ hashFiles('Makefile') }}
+        key: wsl2-ccache-${{ steps.repo-key.outputs.date }}-${{ hashFiles('Makefile','custom_config.sh') }}
         restore-key: |
-          wsl2-ccache-${{ steps.repo-key.outputs.date }}-${{ hashFiles('Makefile') }}
+          wsl2-ccache-${{ steps.repo-key.outputs.date }}-${{ hashFiles('Makefile','custom_config.sh') }}
           wsl2-ccache-${{ steps.repo-key.outputs.date }}
           wsl2-ccache
     - name: git
       if: steps.wsl2_ccache.outputs.cache-hit != 'true'
       run: make kbuild.ccache-init
     - name: kbuild.ccache
-      run: make kbuild.ccache
+      run: make kbuild.ccache </dev/null
