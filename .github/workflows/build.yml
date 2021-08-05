@@ -24,7 +24,7 @@ jobs:
       with:
         path: wsl2-repo
         key: wsl2-repo-${{ steps.repo-key.outputs.date }}
-        restore-key: |
+        restore-keys: |
           wsl2-repo-${{ steps.repo-key.outputs.date }}
           wsl2-repo
     - name: git
@@ -74,7 +74,7 @@ jobs:
       with:
         path: .ccache
         key: wsl2-ccache-${{ steps.repo-key.outputs.date }}-${{ hashFiles('Makefile','custom_config.sh') }}
-        restore-key: |
+        restore-keys: |
           wsl2-ccache-${{ steps.repo-key.outputs.date }}-${{ hashFiles('Makefile','custom_config.sh') }}
           wsl2-ccache-${{ steps.repo-key.outputs.date }}
           wsl2-ccache
