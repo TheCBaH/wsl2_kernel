@@ -44,9 +44,15 @@ CCACHE_CONFIG=--max-size=2G --set-config=compression=true
 kbuild.ccache-init:
 	${MAKE} ${basename $@}.image_run CMD='env CCACHE_DIR=${WORKSPACE}/.ccache ccache ${CCACHE_CONFIG} --print-config'
 
+REPO=wsl2-repo
+CONFIG=Microsoft/config-wsl
+
+configure:
+	./configure.sh ${REPO}/${CONFIG}
+
 CPU_CORES=$(shell getconf _NPROCESSORS_ONLN 2>/dev/null)
 kbuild.ccache:
-	${MAKE} ${basename $@}.image_run CMD="env CCACHE_DIR=${WORKSPACE}/.ccache make -C WSL2-Linux-Kernel CC='ccache gcc' KCONFIG_CONFIG=Microsoft/config-wsl $(if ${CPU_CORES},-j${CPU_CORES})"
+	${MAKE} ${basename $@}.image_run CMD="env CCACHE_DIR=${WORKSPACE}/.ccache make -C ${REPO} CC='ccache gcc' KCONFIG_CONFIG=Microsoft/config-wsl $(if ${CPU_CORES},-j${CPU_CORES})"
 
 kbuild.build:
-	${MAKE} ${basename $@}.image_run CMD="env make -C WSL2-Linux-Kernel KCONFIG_CONFIG=Microsoft/config-wsl $(if ${CPU_CORES},-j${CPU_CORES})"
+	${MAKE} ${basename $@}.image_run CMD="env make -C ${REPO} KCONFIG_CONFIG=${CONFIG} $(if ${CPU_CORES},-j${CPU_CORES})"

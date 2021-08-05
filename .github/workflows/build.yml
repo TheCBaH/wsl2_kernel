@@ -85,6 +85,6 @@ jobs:
     - name: wsl-update
       run: make linux-msft-4.19.128.repo_update
     - name: kbuild.config
-      run: ./custom_config.sh </dev/null
+      run: make configure
     - name: kbuild.ccache
       run: make kbuild.ccache </dev/null

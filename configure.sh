@@ -1,7 +1,7 @@
 #!/bin/bash
 set -x
 set -eu
-config=WSL2-Linux-Kernel/Microsoft/config-wsl
+config=$1
 disable () {
     echo "s/^(CONFIG_$1)=.*/# \1 is not set/"
 }
