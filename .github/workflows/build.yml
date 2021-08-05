@@ -32,7 +32,7 @@ jobs:
       run: |
         set -x
         ./git-prepare.sh
-        du -sh wsl2-repo
+        du -sh wsl2-repo.git
         df -h
     - name: checkout
       run: |
@@ -81,5 +81,7 @@ jobs:
     - name: git
       if: steps.wsl2_ccache.outputs.cache-hit != 'true'
       run: make kbuild.ccache-init
+    - name: kbuild.config
+      run: ./custom_config.sh </dev/null
     - name: kbuild.ccache
       run: make kbuild.ccache </dev/null
