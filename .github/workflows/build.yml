@@ -22,7 +22,10 @@ jobs:
       id: wsl2_repo
       with:
         path: wsl2-repo
-        key: ${{ steps.repo-key.outputs.date }}
+        key: wsl2-repo-${{ steps.repo-key.outputs.date }}
+        restore-key: |
+          wsl2-repo-${{ steps.repo-key.outputs.date }}
+          wsl2-repo
     - name: git
       if: steps.wsl2_repo.outputs.cache-hit != 'true'
       run: |
@@ -33,9 +36,9 @@ jobs:
     - name: checkout
       run: |
         set -x
-        cp -rl wsl2-repo wsl2-repo.git
-        git -c protocol.version=2 -C wsl2-repo.git fetch --depth 1 origin linux-msft-4.19.128:linux-msft-4.19.128
-        git -C wsl2-repo.git checkout linux-msft-4.19.128
+        cp -rl wsl2-repo.git wsl2-repo
+        git -c protocol.version=2 -C wsl2-repo fetch --no-tags --depth 1 origin linux-msft-4.19.128:linux-msft-4.19.128
+        git -C wsl2-repo checkout linux-msft-4.19.128
 
   kernel:
     runs-on: ubuntu-latest
@@ -62,9 +65,20 @@ jobs:
           docker push $IMAGE_ID:latest || true
           rm -rf ~/.docker
         fi
-    - name: kbuild.ccache
+    - id: repo-key
       run: |
-        set -x
-        make kbuild.ccache-init
-        make kbuild.ccache CPU_CORES=2
-        du -sh .ccache
+        echo "::set-output name=date::$(/bin/date -u "+%Y%m")"
+    - uses: actions/cache@v2
+      id: wsl2_ccache
+      with:
+        path: .ccache
+        key: wsl2-ccache-${{ steps.repo-key.outputs.date }}-${{ hashFiles('Makefile') }}
+        restore-key: |
+          wsl2-ccache-${{ steps.repo-key.outputs.date }}-${{ hashFiles('Makefile') }}
+          wsl2-ccache-${{ steps.repo-key.outputs.date }}
+          wsl2-ccache
+    - name: git
+      if: steps.wsl2_ccache.outputs.cache-hit != 'true'
+      run: make kbuild.ccache-init
+    - name: kbuild.ccache
+      run: make kbuild.ccache
