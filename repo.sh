@@ -27,7 +27,7 @@ update)
     else
         cp -rl $repo.git $repo
     fi
-    $_git -c protocol.version=2 fetch --no-tags --depth 1 origin +$ref:remote/$ref
-    $_git reset --merge remote/$ref
+    $_git -c protocol.version=2 fetch --no-tags --depth 1 origin $ref
+    $_git reset --merge FETCH_HEAD
     ;;
 esac
