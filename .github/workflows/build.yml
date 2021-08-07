@@ -123,7 +123,7 @@ jobs:
       run: |
         set -x
         make kbuild.ccache-zero-stats
-        make kbuild.ccache _CPU_CORES=3 </dev/null
+        make kbuild.ccache </dev/null
         make kbuild.ccache-show-stats
     - name: kernel
       run: mv $(make print-kernel)  ${{ matrix.tag }}-${{ github.workflow }}

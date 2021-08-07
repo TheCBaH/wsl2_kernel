@@ -39,7 +39,7 @@ repo_init:
 %.image_print:
 	@echo "$(call image_name, $@)"
 
-CCACHE_CONFIG=--max-size=256M --set-config=compression=false --set-config=cache_dir_levels=1
+CCACHE_CONFIG=--max-size=256M --set-config=compression=true --set-config=cache_dir_levels=1
 
 kbuild.ccache-init:
 	${MAKE} ${basename $@}.image_run CMD='env CCACHE_DIR=${WORKSPACE}/.ccache ccache ${CCACHE_CONFIG} --print-config'
