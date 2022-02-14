@@ -107,6 +107,7 @@ jobs:
     - name: ccache
       uses: actions/cache@v2
       id: wsl2_ccache
+      continue-on-error: true
       with:
         path: .ccache
         key: wsl2-ccache-${{ secrets.CACHE_ID }}-${{ matrix.branch }}-${{ matrix.tag}}-${{ hashFiles('Dockerfile*','Makefile','custom_config.sh') }}
