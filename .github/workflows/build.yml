@@ -110,11 +110,10 @@ jobs:
       continue-on-error: true
       with:
         path: .ccache
-        key: wsl2-ccache-${{ secrets.CACHE_ID }}-${{ matrix.branch }}-${{ matrix.tag}}-${{ hashFiles('Dockerfile*','Makefile','custom_config.sh') }}
+        key: wsl2-ccache-${{ secrets.CACHE_ID }}-${{ matrix.branch }}-${{ matrix.tag}}-${{ hashFiles('Dockerfile*','Makefile','configure.sh') }}
         restore-keys: |
-          wsl2-ccache-${{ secrets.CACHE_ID }}-${{ matrix.branch }}-${{ matrix.tag}}-${{ hashFiles('Dockerfile*','Makefile','custom_config.sh') }}
+          wsl2-ccache-${{ secrets.CACHE_ID }}-${{ matrix.branch }}-${{ matrix.tag}}-${{ hashFiles('Dockerfile*','Makefile','configure.sh') }}
           wsl2-ccache-${{ secrets.CACHE_ID }}-${{ matrix.branch }}-${{ matrix.tag}}
-          wsl2-ccache-${{ secrets.CACHE_ID }}-${{ matrix.branch }}
     - name: ccache.init
       if: steps.wsl2_ccache.outputs.cache-hit != 'true'
       run: make kbuild.ccache-init
