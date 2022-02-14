@@ -18,8 +18,9 @@ image_name=${USER}_$(basename $(1))
 
 %.image: Dockerfile-%
 	docker build --tag $(call image_name,$@) ${DOCKER_BUILD_OPTS} -f $^\
-	 --build-arg OS_VER=stretch-slim\
+	 --build-arg OS_VER=stable-slim\
 	 --build-arg USERINFO=${USER}:${UID}:${GROUP}:${GID}:${KVM}\
+	 --build-arg http_proxy\
 	 .
 
 %.print:
@@ -39,10 +40,11 @@ repo_init:
 %.image_print:
 	@echo "$(call image_name, $@)"
 
-CCACHE_CONFIG=--max-size=256M --set-config=compression=true --set-config=cache_dir_levels=1
+CCACHE_CONFIG=--max-size=256M --set-config=compression=true
 
 kbuild.ccache-init:
-	${MAKE} ${basename $@}.image_run CMD='env CCACHE_DIR=${WORKSPACE}/.ccache ccache ${CCACHE_CONFIG} --print-config'
+	${MAKE} ${basename $@}.image_run CMD='ccache --version'
+	${MAKE} ${basename $@}.image_run CMD='env CCACHE_DIR=${WORKSPACE}/.ccache ccache ${CCACHE_CONFIG} --show-config'
 
 REPO=wsl2-repo
 CONFIG=Microsoft/config-wsl
