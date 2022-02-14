@@ -40,7 +40,7 @@ repo_init:
 %.image_print:
 	@echo "$(call image_name, $@)"
 
-CCACHE_CONFIG=--max-size=256M --set-config=compression=true
+CCACHE_CONFIG=--max-size=128M --set-config=compression=true
 
 kbuild.ccache-init:
 	${MAKE} ${basename $@}.image_run CMD='ccache --version'
@@ -55,10 +55,12 @@ configure:
 CPU_CORES=$(shell getconf _NPROCESSORS_ONLN 2>/dev/null)
 
 kbuild.ccache-zero-stats:
-	${MAKE} ${basename $@}.image_run CMD='env CCACHE_DIR=${WORKSPACE}/.ccache ccache ${CCACHE_CONFIG} --zero-stats'
+	${MAKE} ${basename $@}.image_run CMD='env CCACHE_DIR=${WORKSPACE}/.ccache ccache --show-compression'
+	${MAKE} ${basename $@}.image_run CMD='env CCACHE_DIR=${WORKSPACE}/.ccache ccache --zero-stats'
 
 kbuild.ccache-show-stats:
-	${MAKE} ${basename $@}.image_run CMD='env CCACHE_DIR=${WORKSPACE}/.ccache ccache ${CCACHE_CONFIG} --show-stats'
+	${MAKE} ${basename $@}.image_run CMD='env CCACHE_DIR=${WORKSPACE}/.ccache ccache --show-stats'
+	${MAKE} ${basename $@}.image_run CMD='env CCACHE_DIR=${WORKSPACE}/.ccache ccache --show-compression'
 
 kbuild.ccache:
 	${MAKE} ${basename $@}.image_run CMD="cc --version"
