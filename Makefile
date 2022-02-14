@@ -61,6 +61,7 @@ kbuild.ccache-show-stats:
 	${MAKE} ${basename $@}.image_run CMD='env CCACHE_DIR=${WORKSPACE}/.ccache ccache ${CCACHE_CONFIG} --show-stats'
 
 kbuild.ccache:
+	${MAKE} ${basename $@}.image_run CMD="cc --version"
 	${MAKE} ${basename $@}.image_run CMD="env CCACHE_DIR=${WORKSPACE}/.ccache make -C ${REPO} CC='ccache gcc' KCONFIG_CONFIG=Microsoft/config-wsl $(if ${CPU_CORES},-j${CPU_CORES})"
 
 kbuild.build:
