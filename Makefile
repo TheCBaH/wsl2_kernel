@@ -18,7 +18,7 @@ image_name=${USER}_$(basename $(1))
 
 %.image: Dockerfile-%
 	docker build --tag $(call image_name,$@) ${DOCKER_BUILD_OPTS} -f $^\
-	 --build-arg OS_VER=latest\
+	 --build-arg OS_VER=stretch-slim\
 	 --build-arg USERINFO=${USER}:${UID}:${GROUP}:${GID}:${KVM}\
 	 .
 
