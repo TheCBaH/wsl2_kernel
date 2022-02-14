@@ -1,5 +1,6 @@
 ARG OS_VER
 FROM debian:${OS_VER}
+ARG USERINFO
 RUN set -eux;\
     sed -E -i 's/^(deb) (.+)/\1 \2\n\1-src \2/' /etc/apt/sources.list;\
     apt-get update;\
@@ -11,5 +12,8 @@ RUN set -eux;\
     env DEBIAN_FRONTEND=noninteractive apt-get build-dep -y --quiet --no-install-recommends\
  linux\
  ;\
+    user=$(echo ${USERINFO}|cut -f1 -d:);\
+    uid=$(echo ${USERINFO}|cut -f2 -d:);\
+    useradd -m -u $uid $user;\
     apt-get clean; rm -rf /var/lib/apt/lists/*;\
     echo DONE
