@@ -10,7 +10,7 @@ with_retry() {
             break
         fi
         rc=$?
-        sleep $(od -A n -t d -N 1 /dev/urandom)
+        sleep $(expr 1 + $(od -A n -t d -N 1 /dev/urandom) % 5)
     done
     if [ $rc -ne 0 ]; then
         exit $rc
