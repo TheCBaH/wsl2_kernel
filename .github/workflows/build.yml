@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: false
     - name: ID
@@ -20,7 +20,7 @@ jobs:
       run: |
         echo "::set-output name=date::$(/bin/date -u "+%Y%m")"
     - name: git-cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: wsl2_repo
       with:
         path: wsl2-repo.git
@@ -83,7 +83,7 @@ jobs:
             tag: linux-msft-wsl-5.10.y
     steps:
     - name: checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: false
     - name: kbuild.image
@@ -105,7 +105,7 @@ jobs:
           rm -rf ~/.docker
         fi
     - name: ccache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: wsl2_ccache
       continue-on-error: true
       with:
@@ -118,7 +118,7 @@ jobs:
       if: steps.wsl2_ccache.outputs.cache-hit != 'true'
       run: make kbuild.ccache-init
     - name: repo
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: wsl2_repo
       with:
         path: wsl2-repo.git
@@ -142,7 +142,7 @@ jobs:
     - name: kernel
       run: mv $(make print-kernel)  ${{ matrix.tag }}-${{ github.workflow }}
     - name: wsl2-kernel
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.tag }}
         path: ${{ matrix.tag }}-${{ github.workflow }}
