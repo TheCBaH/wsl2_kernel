@@ -37,4 +37,4 @@ sed -Ei\
  -e "$(enable CC_OPTIMIZE_FOR_SIZE)"\
  $config
 
-git -C $(dirname $config) diff
+git --no-pager -C $(dirname $config) diff
