@@ -3,6 +3,20 @@ set -x
 set -eu
 cmd=$1;shift
 
+with_retry() {
+    rc=0
+    for i in $(seq 1 10); do
+        if "$@" ; then
+            break
+        fi
+        rc=$?
+        sleep $(expr 1 + $(od -A n -t d -N 1 /dev/urandom) % 5)
+    done
+    if [ $rc -ne 0 ]; then
+        exit $rc
+    fi
+}
+
 repo=wsl2-repo
 _git="git -C $repo.git"
 case "$cmd" in
@@ -15,11 +29,11 @@ init)
     for b in linux-msft-wsl-4.19.y linux-msft-wsl-5.10.y linux-msft-wsl-5.4.y; do
         $_git remote set-branches --add origin $b
     done
-    $_git -c protocol.version=2 fetch --no-tags --depth 1 origin
+    with_retry $_git -c protocol.version=2 fetch --no-tags --depth 1 origin
     ;;
 update)
     ref=$1;shift
-    $_git -c protocol.version=2 fetch --no-tags --depth 1 origin
+    with_retry $_git -c protocol.version=2 fetch --no-tags --depth 1 origin
     _git="git -C $repo"
     if [ -d $repo ]; then
         $_git checkout .
@@ -27,7 +41,7 @@ update)
     else
         cp -rl $repo.git $repo
     fi
-    $_git -c protocol.version=2 fetch --no-tags --depth 1 origin $ref
+    with_retry $_git -c protocol.version=2 fetch --no-tags --depth 1 origin $ref
     $_git reset --merge FETCH_HEAD
     ;;
 esac
